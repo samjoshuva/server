@@ -2,7 +2,12 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const Joi = require('joi');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const _ = require('lodash');
 
+
+mongoose.set('useCreateIndex', true);
 const users = mongoose.model('User', new mongoose.Schema({
    name: {
       type: String,
@@ -21,40 +26,76 @@ const users = mongoose.model('User', new mongoose.Schema({
       type: String,
       required: true,
       minlength: 5,
-      maxlength: 30
-   }
+
+   },
+   tokens: [{
+      type: String
+   }],
 }))
 
 
 
-
+//Get all user
 router.get('/', async (req, res) => {
    const users = await users.find().sort("name");
    res.send(users);
 });
 
 
-
+//get user by id
 router.get('/:id', async (req, res) => {
-   const user = await users.find({
+   const user = await users.findOne({
       _id: req.params.id
    });
    if (!user) return res.status(400).send("no such user register");
-
-
-
-
    res.send(user);
 });
 
+//Login user by name
+router.post('/login', async (req, res) => {
+   const user = await users.findOne({
+      email: req.body.email
+   });
+   if (!user) return res.status(400).send("no such user register");
+
+   bcrypt.compare(req.body.password, user.password, (err, result) => {
+      if (err) throw err;
+
+      if (!result) {
+         return res.status(404).send("Password not match")
+      }
+
+      const token = jwt.sign(JSON.stringify(user), "secretKey");
+      res.send(_.pick(user, ["name", "email"]))
+      console.log(token)
+
+   })
 
 
-router.post('/', async (req, res) => {
+
+
+
+
+
+
+
+});
+
+
+//Register a user
+router.post('/register', async (req, res) => {
    const {
       error
    } = validateUser(req.body);
    if (error) return res.status(400).send(error.details[0].message);
 
+   let user = await users.findOne({
+      email: req.body.email
+   });
+
+   if (user) {
+      return res.status(400).send("user already exists");
+   }
 
    user = new users({
       name: req.body.name,
@@ -62,28 +103,31 @@ router.post('/', async (req, res) => {
       password: req.body.password
    });
 
-   user = await user.save();
+   const salt = await bcrypt.genSalt(10);
+   user.password = await bcrypt.hash(user.password, salt);
 
-   res.send(user)
+   user.save().then((result) => {
+      res.send(_.pick(result, ["name", "email"]))
+   }).catch((err) => {
+      res.status(400).send(err)
+   });
+
+
 });
 
-router.put('/:id', async (req, res) => {
-   const {
-      error
-   } = validateUser(req.body);
-   if (error) return res.status(400).send(error.details[0].message);
 
-   const user = await users.findByIdAndUpdate(req.params.id, {
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.password
-   }, {
+//update user
+router.put('/:id', async (req, res) => {
+
+   const user = await users.findByIdAndUpdate(req.params.id, req.body, {
       new: true
    })
 
    res.send(user);
 });
 
+
+// delete user 
 router.delete('/:id', async (req, res) => {
    user = await users.findByIdAndDelete(req.params.id, )
 
@@ -92,7 +136,7 @@ router.delete('/:id', async (req, res) => {
    res.send(user);
 });
 
-
+// validate user object from front end 
 function validateUser(user) {
    const schema = {
       name: Joi.string().min(5).max(50).required(),
