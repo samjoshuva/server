@@ -3,7 +3,6 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const Joi = require('joi');
 
-
 const users = mongoose.model('User', new mongoose.Schema({
    name: {
       type: String,
