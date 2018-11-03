@@ -1,0 +1,24 @@
+<div class="container login-form">
+  <mat-card>
+    <form class=" container form">
+      <h2 align="center">Create a new Project</h2>
+      <mat-form-field class="full-width">
+        <input matInput type="text" placeholder="Project Name" [formControl]="name">
+
+        <mat-error *ngIf="name.hasError('required')">
+          name is <strong>required</strong>
+        </mat-error>
+        <mat-error *ngIf="name.hasError('length')">
+          name should be <strong>5-20 characters</strong>
+        </mat-error>
+        <mat-error *ngIf="name.hasError('maxLength')">
+          name should be <strong>5-20 characters</strong>
+        </mat-error>
+      </mat-form-field>
+      <br>
+
+      <br>
+      <button mat-raised-button color="primary" (click)="create()"> Create an Project</button>
+    </form>
+  </mat-card>
+</div>

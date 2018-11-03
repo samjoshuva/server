@@ -1,0 +1,54 @@
+<div class="container login-form">
+  <mat-card>
+    <form class=" container form">
+      <h2 align="center">Create a new Account</h2>
+      <mat-form-field class="full-width">
+        <input matInput type="text" placeholder="Name" [formControl]="name">
+
+        <mat-error *ngIf="name.hasError('required')">
+          name is <strong>required</strong>
+        </mat-error>
+        <mat-error *ngIf="name.hasError('length')">
+          name should be <strong>5-20 characters</strong>
+        </mat-error>
+        <mat-error *ngIf="name.hasError('maxLength')">
+          name should be <strong>5-20 characters</strong>
+        </mat-error>
+      </mat-form-field>
+      <br>
+      <mat-form-field class="full-width">
+        <input matInput placeholder="Email" [formControl]="email">
+        <mat-error *ngIf="email.hasError('email') && !email.hasError('required')">
+          Please enter a valid email address
+        </mat-error>
+        <mat-error *ngIf="email.hasError('required')">
+          Email is <strong>required</strong>
+        </mat-error>
+      </mat-form-field>
+
+      <br>
+      <mat-form-field class="full-width">
+        <input matInput type="password" placeholder="Password" [formControl]="password">
+        <mat-error *ngIf="!password.hasError('required')">
+          Please enter a valid password address
+        </mat-error>
+        <mat-error *ngIf="password.hasError('required')">
+          Password is <strong>required</strong>
+        </mat-error>
+      </mat-form-field>
+
+      <br>
+      <mat-form-field class="full-width">
+        <input matInput type="password" placeholder="Confirm Password" [formControl]="con_password">
+        <mat-error *ngIf="!con_password.hasError('required')">
+          Please enter a valid password address
+        </mat-error>
+        <mat-error *ngIf="con_password.hasError('required')">
+          Password is <strong>required</strong>
+        </mat-error>
+      </mat-form-field>
+      <br>
+      <button mat-raised-button color="primary" (click)="signup()"> Create an Account</button>
+    </form>
+  </mat-card>
+</div>

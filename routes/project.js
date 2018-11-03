@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const Joi = require('joi');
+const auth = require('../middleware/auth');
 
 
 const projects = mongoose.model('Project', new mongoose.Schema({
@@ -25,7 +26,7 @@ const projects = mongoose.model('Project', new mongoose.Schema({
 
 
 
-router.get('/:username', async (req, res) => {
+router.get('/:username', auth, async (req, res) => {
    const project = await projects.find({
       username: req.params.username
    }).sort("name");
@@ -53,7 +54,7 @@ router.get('/:id', async (req, res) => {
 
 
 
-router.post('/create', async (req, res) => {
+router.post('/create', auth, async (req, res) => {
    const {
       error
    } = validateproject(req.body);
@@ -72,7 +73,7 @@ router.post('/create', async (req, res) => {
    // res.send(project)
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
    project = await projects.findByIdAndDelete(req.params.id, )
 
    if (!project) return res.status(400).send("no such project register");

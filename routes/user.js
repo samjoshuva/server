@@ -5,149 +5,169 @@ const Joi = require('joi');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const _ = require('lodash');
-
+const auth = require('../middleware/auth')
 
 mongoose.set('useCreateIndex', true);
-const users = mongoose.model('User', new mongoose.Schema({
-   name: {
-      type: String,
-      required: true,
-      minlength: 5,
-      maxlength: 30
-   },
-   email: {
-      type: String,
-      required: true,
-      minlength: 5,
-      unique: true,
-      maxlength: 30
-   },
-   password: {
-      type: String,
-      required: true,
-      minlength: 5,
-
-   },
-   tokens: [{
-      type: String
-   }],
-}))
-
-
+const users = mongoose.model(
+      'User',
+      new mongoose.Schema({
+            name: {
+                  type: String,
+                  required: true,
+                  minlength: 5,
+                  maxlength: 30
+            },
+            email: {
+                  type: String,
+                  required: true,
+                  minlength: 5,
+                  unique: true,
+                  maxlength: 30
+            },
+            password: {
+                  type: String,
+                  required: true,
+                  minlength: 5
+            },
+            tokens: [{
+                  type: String
+            }]
+      })
+);
 
 //Get all user
 router.get('/', async (req, res) => {
-   const users = await users.find().sort("name");
-   res.send(users);
+      const user = await users.find().sort('name');
+      res.send(user);
 });
-
 
 //get user by id
 router.get('/:id', async (req, res) => {
-   const user = await users.findOne({
-      _id: req.params.id
-   });
-   if (!user) return res.status(400).send("no such user register");
-   res.send(user);
+      const user = await users.findOne({
+            _id: req.params.id
+      });
+      if (!user) return res.status(400).send('no such user register');
+      res.send(user);
 });
 
 //Login user by name
 router.post('/login', async (req, res) => {
-   const user = await users.findOne({
-      email: req.body.email
-   });
-   if (!user) return res.status(400).send("no such user register");
+      const user = await users.findOne({
+            email: req.body.email
+      });
+      if (!user)
+            return res.json({
+                  success: false,
+                  msg: 'User not found'
+            });
 
-   bcrypt.compare(req.body.password, user.password, (err, result) => {
-      if (err) throw err;
+      bcrypt.compare(req.body.password, user.password, (err, result) => {
+            if (err) throw err;
 
-      if (!result) {
-         return res.status(404).send("Password not match")
-      }
+            if (!result)
+                  return res.json({
+                        success: false,
+                        msg: 'Wrong password'
+                  });
 
-      const token = jwt.sign(JSON.stringify(user), "secretKey");
-      res.send(_.pick(user, ["name", "email"]))
-      console.log(token)
-
-   })
-
-
-
-
-
-
-
-
-
+            const token = jwt.sign(JSON.stringify(user), 'jwtPrivateKey');
+            res.header('x-auth', token).json({
+                  success: true,
+                  token: token,
+                  user: {
+                        id: user._id,
+                        name: user.name,
+                        email: user.email
+                  }
+            });
+      });
 });
-
 
 //Register a user
 router.post('/register', async (req, res) => {
-   const {
-      error
-   } = validateUser(req.body);
-   if (error) return res.status(400).send(error.details[0].message);
+      const {
+            error
+      } = validateUser(req.body);
+      if (error) return res.status(400).send(error.details[0].message);
 
-   let user = await users.findOne({
-      email: req.body.email
-   });
+      let user = await users.findOne({
+            email: req.body.email
+      });
 
-   if (user) {
-      return res.status(400).send("user already exists");
-   }
+      if (user) {
+            return res.json({
+                  success: false,
+                  message: 'User Already Rgistered'
+            });
+      }
 
-   user = new users({
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.password
-   });
+      user = new users({
+            name: req.body.name,
+            email: req.body.email,
+            password: req.body.password
+      });
 
-   const salt = await bcrypt.genSalt(10);
-   user.password = await bcrypt.hash(user.password, salt);
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(user.password, salt);
 
-   user.save().then((result) => {
-      res.send(_.pick(result, ["name", "email"]))
-   }).catch((err) => {
-      res.status(400).send(err)
-   });
-
-
+      user
+            .save()
+            .then(result => {
+                  res.json({
+                        success: true,
+                        user: _.pick(result, ['name', 'email'])
+                  });
+            })
+            .catch(err => {
+                  res.json({
+                        success: false,
+                        user: 'Cannot create a Account'
+                  });
+            });
 });
-
 
 //update user
 router.put('/:id', async (req, res) => {
+      const user = await users.findByIdAndUpdate(req.params.id, req.body, {
+            new: true
+      });
 
-   const user = await users.findByIdAndUpdate(req.params.id, req.body, {
-      new: true
-   })
-
-   res.send(user);
+      res.json({
+            success: true,
+            message: 'Updated Sucessfully'
+      });
 });
 
-
-// delete user 
+// delete user
 router.delete('/:id', async (req, res) => {
-   user = await users.findByIdAndDelete(req.params.id, )
+      user = await users.findByIdAndDelete(req.params.id);
 
-   if (!user) return res.status(400).send("no such user register");
+      if (!user) return res.status(400).send('no such user register');
 
-   res.send(user);
+      res.json({
+            success: true,
+            message: 'Deleted Sucessfully'
+      });
 });
 
-// validate user object from front end 
+// validate user object from front end
 function validateUser(user) {
-   const schema = {
-      name: Joi.string().min(5).max(50).required(),
-      email: Joi.string().min(5).max(50).required(),
-      password: Joi.string().min(5).max(50).required(),
-   };
+      const schema = {
+            name: Joi.string()
+                  .min(5)
+                  .max(50)
+                  .required(),
+            email: Joi.string()
+                  .min(5)
+                  .max(50)
+                  .required(),
+            password: Joi.string()
+                  .min(5)
+                  .max(50)
+                  .required()
+      };
 
-   return Joi.validate(user, schema);
+      return Joi.validate(user, schema);
 }
-
-
-
 
 module.exports = router;

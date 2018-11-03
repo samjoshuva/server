@@ -1,0 +1,22 @@
+<mat-toolbar color="primary">
+  <mat-toolbar-row>
+    <span routerLink="">ConvoBot</span>
+
+    <button *ngIf="auth.isLoggedIn()" mat-button routerLink="/dashboard" routerLinkActive="active">DashBoard</button>
+    <span class="example-spacer"></span>
+
+    <button *ngIf="!auth.isLoggedIn()" mat-button routerLink="/login" routerLinkActive="active">Login</button>
+
+
+    <button *ngIf="!auth.isLoggedIn()" mat-button routerLink="/signup" routerLinkActive="active">Create an accounts</button>
+    <button *ngIf="auth.isLoggedIn()" mat-button (click)="logout()" routerLinkActive="active">logout</button>
+
+
+  </mat-toolbar-row>
+
+
+
+
+
+
+</mat-toolbar>
