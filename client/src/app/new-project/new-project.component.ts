@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { ProjectService } from '../services/project/project.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-new-project',
@@ -14,7 +15,7 @@ export class NewProjectComponent implements OnInit {
     Validators.maxLength(30)
   ]);
 
-  constructor(private project: ProjectService) {}
+  constructor(private project: ProjectService, private router: Router) {}
 
   ngOnInit() {}
 
@@ -28,6 +29,7 @@ export class NewProjectComponent implements OnInit {
       this.project
         .createProject(project, localStorage.getItem('token'))
         .subscribe(console.log);
+      this.router.navigate(['dashboard']);
     }
   }
 }

@@ -18,6 +18,7 @@ import { SnackbarComponent } from './snackbar/snackbar.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { ProjectService } from './services/project/project.service';
 import { NewProjectComponent } from './new-project/new-project.component';
+import { ProjectComponent } from './project/project.component';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,8 @@ import { NewProjectComponent } from './new-project/new-project.component';
     NavComponent,
     SnackbarComponent,
     DashboardComponent,
-    NewProjectComponent
+    NewProjectComponent,
+    ProjectComponent
   ],
   imports: [
     BrowserModule,

@@ -1,13 +1,21 @@
 <div class="container">
   <div class="project-list">
 
-    <button mat-button routerLink="/newproject" color="primary">
-      Create a project
-    </button>
 
-    <button mat-button (click)="getProject()" color="primary">
-      Get all project
-    </button>
+    <mat-card mat-button routerLink="/newproject" class="project">
+      <h4 class="project-title"> Create a project</h4>
+
+    </mat-card>
+
+    <div *ngIf="allProjects">
+      <mat-card class="project" class="project" *ngFor="let project of allProjects" (click)="navProject(project?._id)">
+        <h4 class="project-title"> {{project?.name}}</h4>
+
+      </mat-card>
+    </div>
+
+
+
 
 
   </div>

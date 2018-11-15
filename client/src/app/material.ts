@@ -4,12 +4,15 @@ import {
   MatInputModule,
   MatCardModule,
   MatToolbarModule,
-  MatIconModule,
   MatSnackBarModule,
   MatTableModule,
   MatDialogModule
 } from '@angular/material';
 import { NgModule } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatExpansionModule } from '@angular/material/expansion';
+
 import { MatFormFieldModule } from '@angular/material/form-field';
 @NgModule({
   imports: [
@@ -22,7 +25,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     MatIconModule,
     MatSnackBarModule,
     MatTableModule,
-    MatDialogModule
+    MatDialogModule,
+    MatProgressBarModule,
+    MatExpansionModule
   ],
   exports: [
     MatButtonModule,
@@ -34,7 +39,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     MatIconModule,
     MatSnackBarModule,
     MatTableModule,
-    MatDialogModule
+    MatDialogModule,
+    MatProgressBarModule,
+    MatExpansionModule
   ]
 })
 export class MaterialModule {}

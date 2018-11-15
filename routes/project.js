@@ -3,6 +3,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const Joi = require('joi');
 const auth = require('../middleware/auth');
+const fs = require("fs");
 
 
 const projects = mongoose.model('Project', new mongoose.Schema({
@@ -26,7 +27,7 @@ const projects = mongoose.model('Project', new mongoose.Schema({
 
 
 
-router.get('/:username', auth, async (req, res) => {
+router.get('/username/:username', auth, async (req, res) => {
    const project = await projects.find({
       username: req.params.username
    }).sort("name");
@@ -37,16 +38,19 @@ router.get('/:username', auth, async (req, res) => {
 
 
 
-router.get('/:id', async (req, res) => {
-   const project = await projects.find({
-      _id: req.params.id
-   });
+router.get('/id/:id', async (req, res) => {
+   const project = await projects.findById(req.params.id)
    if (!project) return res.status(400).send("no such project register");
 
+   fs.readFile(`./files/${project.name}.rive`, (err, data) => {
+      if (err) throw err;
+      data = data.toString();
+      res.json({
+         project,
+         data
+      })
+   })
 
-
-
-   res.send(project);
 });
 
 
@@ -64,11 +68,54 @@ router.post('/create', auth, async (req, res) => {
    project = new projects(req.body);
 
    project.save().then((result) => {
-      res.send(result)
+      fs.appendFile(`./files/${project.name}.rive`, `Hai Welcome to ${project.name}`, (err) => {
+         if (err) throw err;
+
+         res.send(result)
+      })
+
+
    }).catch((err) => {
       res.status(400).send(err)
 
    });
+
+   // res.send(project)
+});
+
+
+router.put('/update/:id', auth, async (req, res) => {
+   const project = await projects.findById(req.params.id);
+   if (!project) return res.status(400).send("no such project register");
+
+   const newIntent = (req.body);
+   const query = newIntent['query'];
+   const response = newIntent['response'];
+
+
+
+
+
+   query.forEach(element => {
+      fs.appendFile(`./files/${project.name}.rive`, `${ "+" + element['queryText'] + "\n"}`, (err) => {
+         if (err) throw err;
+      });
+   });
+
+   response.forEach(element => {
+      fs.appendFile(`./files/${project.name}.rive`, `${ "-" + element['responseText'] + "\n"}`, (err) => {
+         if (err) throw err;
+      });
+   });
+
+
+
+
+
+   res.json({
+      "sucess": true
+   })
+
 
    // res.send(project)
 });
@@ -90,6 +137,7 @@ function validateproject(project) {
 
    return Joi.validate(project, schema);
 }
+
 
 
 

@@ -6,6 +6,7 @@ import { LoginComponent } from './login/login.component';
 import { SignupComponent } from './signup/signup.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { NewProjectComponent } from './new-project/new-project.component';
+import { ProjectComponent } from './project/project.component';
 
 const routes: Routes = [
   { path: ' ', component: HomeComponent },
@@ -19,6 +20,11 @@ const routes: Routes = [
   {
     path: 'newproject',
     component: NewProjectComponent,
+    canActivate: [AuthGuardService]
+  },
+  {
+    path: 'project/:id',
+    component: ProjectComponent,
     canActivate: [AuthGuardService]
   }
 ];
